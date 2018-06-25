@@ -1,0 +1,15 @@
+[flake8]
+max-line-length = 120
+exclude =
+    .git,
+    __pycache__,
+    src,
+    bin,
+    build,
+    dist,
+    lib,
+    migrations,
+    docs,
+    .venv,
+    .env,
+    kombu

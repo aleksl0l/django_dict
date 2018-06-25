@@ -28,8 +28,3 @@ class Words(models.Model):
 
     def __str__(self):
         return str(self.id) + " | " + self.word
-
-
-# class Setsandword(models.Model):
-#     set = models.ForeignKey(Sets, on_delete=models.DO_NOTHING)
-#     word = models.ForeignKey(Words, on_delete=models.DO_NOTHING)

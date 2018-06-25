@@ -1,18 +1,14 @@
-from django.shortcuts import render
-from rest_framework import viewsets, generics, status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .models import Users, Sets, Setsandword, Words
-from .serializers import UsersSerializer, SetsSerializer
+from rest_framework.generics import ListAPIView
+from .models import Users, Sets, Words
+from .serializers import UsersSerializer, SetsSerializer, WordsSerializer
 
 
-class UsersView(viewsets.ModelViewSet):
+class UsersListView(ListAPIView):
     queryset = Users.objects.all()
     serializer_class = UsersSerializer
 
 
-class SetsByUserView(generics.ListAPIView):
+class SetsByUserView(ListAPIView):
     serializer_class = SetsSerializer
 
     def get_queryset(self):
@@ -23,17 +19,24 @@ class SetsByUserView(generics.ListAPIView):
         return queryset
 
 
-class UsersList(APIView):
-    def get(self, request, format=None):
-        snippets = Users.objects.all()
-        serializer = UsersSerializer(snippets, many=True)
-        return Response(serializer.data)
+class WordsListView(ListAPIView):
+    serializer_class = WordsSerializer
 
-    def post(self, request, format=None):
-        serializer = UsersSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        queryset = Words.objects.filter(sets__id=self.kwargs['pk'])
+        return queryset
 
+# class UsersList(APIView):
+#     def get(self, request, format=None):
+#         users = Users.objects.all()
+#         serializer = UsersSerializer(users, many=True)
+#         return Response(serializer.data)
+#
+#     def post(self, request, format=None):
+#         serializer = UsersSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
 

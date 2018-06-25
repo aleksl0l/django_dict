@@ -24,8 +24,12 @@ class Sets(models.Model):
 class Words(models.Model):
     word = models.CharField(max_length=40, unique=True)
     meaning = models.TextField()
+    sets = models.ManyToManyField(to=Sets, related_name='words')
+
+    def __str__(self):
+        return str(self.id) + " | " + self.word
 
 
-class Setsandword(models.Model):
-    set = models.ForeignKey(Sets, on_delete=models.DO_NOTHING)
-    word = models.ForeignKey(Words, on_delete=models.DO_NOTHING)
+# class Setsandword(models.Model):
+#     set = models.ForeignKey(Sets, on_delete=models.DO_NOTHING)
+#     word = models.ForeignKey(Words, on_delete=models.DO_NOTHING)

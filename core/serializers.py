@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Users, Sets, Words, Setsandword
+from .models import Users, Sets, Words
 
 
 class UsersSerializer(serializers.ModelSerializer):

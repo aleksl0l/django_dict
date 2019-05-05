@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -18,6 +19,15 @@ class Set(models.Model):
 
 
 class Meaning(models.Model):
+    meaning = models.TextField()
+    word = models.ForeignKey(to='Word', related_name='meanings', on_delete=models.SET_NULL, null=True)
+    examples = ArrayField(models.TextField())
+
+    def __str__(self):
+        return self.meaning
+
+
+class Word(models.Model):
     NOUN = 'noun'
     ADJECTIVE = 'adjective'
     VERB = 'verb'
@@ -36,17 +46,9 @@ class Meaning(models.Model):
         (CONJUNCTION, 'Conjunction'),
         (INTERJECTION, 'Interjection'),
     )
-    meaning = models.TextField()
-    part_of_speech = models.TextField(choices=PART_OF_SPEECH)
-    word = models.ForeignKey(to='Word', related_name='meanings', on_delete=models.SET_NULL, null=True)
-
-    def __str__(self):
-        return self.meaning
-
-
-class Word(models.Model):
     word = models.CharField(max_length=40, unique=True)
     sets = models.ManyToManyField(to=Set, related_name='words')
+    part_of_speech = models.TextField(choices=PART_OF_SPEECH, null=True)
 
     def __str__(self):
         return self.word

@@ -17,9 +17,35 @@ class Set(models.Model):
         return self.name
 
 
+class Meaning(models.Model):
+    NOUN = 'noun'
+    ADJECTIVE = 'adjective'
+    VERB = 'verb'
+    ADVERB = 'adverb'
+    PRONOUN = 'pronoun'
+    PREPOSITION = 'preposition'
+    CONJUNCTION = 'conjunction'
+    INTERJECTION = 'interjection'
+    PART_OF_SPEECH = (
+        (NOUN, 'Noun'),
+        (ADJECTIVE, 'Adjective'),
+        (VERB, 'Verb'),
+        (ADVERB, 'Adverb'),
+        (PRONOUN, 'Pronoun'),
+        (PREPOSITION, 'Preposition'),
+        (CONJUNCTION, 'Conjunction'),
+        (INTERJECTION, 'Interjection'),
+    )
+    meaning = models.TextField()
+    part_of_speech = models.TextField(choices=PART_OF_SPEECH)
+    word = models.ForeignKey(to='Word', related_name='meanings', on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.meaning
+
+
 class Word(models.Model):
     word = models.CharField(max_length=40, unique=True)
-    meaning = models.TextField()
     sets = models.ManyToManyField(to=Set, related_name='words')
 
     def __str__(self):

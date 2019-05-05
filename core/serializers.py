@@ -67,13 +67,16 @@ class AddWordsSerializer(serializers.Serializer):
         words_set = set(words_instances.values_list('word', flat=True))
         words_instances = list(words_instances)
         with atomic():
-            for word in words:
-                if word not in words_set:
-                    word_instance = Word.objects.create(word=word)
-                    update_meaning_cam.delay(word_instance.id)
-                    words_instances.append(word_instance)
+            self.create_words(words, words_instances, words_set)
         set_instance.words.add(*words_instances)
         return set_instance
+
+    def create_words(self, words, words_instances, words_set):
+        for word in words:
+            if word not in words_set:
+                word_instance = Word.objects.create(word=word)
+                update_meaning_cam.delay(word_instance.id)
+                words_instances.append(word_instance)
 
     def to_representation(self, instance):
         return SetDetailSerializer(instance).data

@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Users, Sets, Words
 
-admin.site.register(Users)
-admin.site.register(Sets)
-admin.site.register(Words)
+from .models import User, Set, Word
+
+admin.site.register(User)
+admin.site.register(Set)
+admin.site.register(Word)

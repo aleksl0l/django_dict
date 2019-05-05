@@ -1,14 +1,15 @@
-from django.conf.urls import url
+from django.urls import path, include
 from rest_framework import routers
+from rest_framework.authtoken.views import ObtainAuthToken
 
 from . import views
 
-router = routers.DefaultRouter()
-router.register('users', views.UsersListView)
-# router.register('sets', views.SetsByUserView, base_name='sets')
+router = routers.SimpleRouter()
+router.register(r'users', views.UsersView, 'users')
+router.register(r'sets', views.SetViewSet, 'sets')
+
 urlpatterns = [
-    url(r'^sets/$', views.SetsByUserView.as_view()),
-    url(r'^users/$', views.UsersListView.as_view()),
-    url(r'^words/(?P<pk>[0-9]+)/$', views.WordsListView.as_view())
-    # path('', include(router.urls))
+    path('login', ObtainAuthToken.as_view(), name='user_login'),
+    path('sets/<int:set_id>/words', views.WordCreateView.as_view()),
+    path('', include(router.urls))
 ]

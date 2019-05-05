@@ -2,7 +2,8 @@ from django.db.transaction import atomic
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import User, Set, Word
+from core.tasks import update_meaning_cam
+from .models import User, Set, Word, Meaning
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,11 +27,18 @@ class SetSerializer(serializers.ModelSerializer):
         extra_kwargs = {'description': {'required': False}}
 
 
+class MeaningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Meaning
+        fields = ('id', 'meaning', 'examples')
+
+
 class WordsSerializer(serializers.ModelSerializer):
+    meanings = MeaningSerializer(many=True)
 
     class Meta:
         model = Word
-        fields = ('id', 'word', 'meaning')
+        fields = ('id', 'word', 'meanings')
 
 
 class SetDetailSerializer(serializers.ModelSerializer):
@@ -61,7 +69,9 @@ class AddWordsSerializer(serializers.Serializer):
         with atomic():
             for word in words:
                 if word not in words_set:
-                    words_instances.append(Word.objects.create(word=word))
+                    word_instance = Word.objects.create(word=word)
+                    update_meaning_cam.delay(word_instance.id)
+                    words_instances.append(word_instance)
         set_instance.words.add(*words_instances)
         return set_instance
 

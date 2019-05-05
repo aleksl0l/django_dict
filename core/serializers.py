@@ -2,7 +2,8 @@ from django.db.transaction import atomic
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from .models import User, Set, Word
+from core.tasks import update_meaning_cam
+from .models import User, Set, Word, Meaning
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -26,11 +27,18 @@ class SetSerializer(serializers.ModelSerializer):
         extra_kwargs = {'description': {'required': False}}
 
 
+class MeaningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Meaning
+        fields = ('id', 'meaning', 'examples')
+
+
 class WordsSerializer(serializers.ModelSerializer):
+    meanings = MeaningSerializer(many=True)
 
     class Meta:
         model = Word
-        fields = ('id', 'word', 'meaning')
+        fields = ('id', 'word', 'meanings')
 
 
 class SetDetailSerializer(serializers.ModelSerializer):
@@ -59,11 +67,16 @@ class AddWordsSerializer(serializers.Serializer):
         words_set = set(words_instances.values_list('word', flat=True))
         words_instances = list(words_instances)
         with atomic():
-            for word in words:
-                if word not in words_set:
-                    words_instances.append(Word.objects.create(word=word))
+            self.create_words(words, words_instances, words_set)
         set_instance.words.add(*words_instances)
         return set_instance
+
+    def create_words(self, words, words_instances, words_set):
+        for word in words:
+            if word not in words_set:
+                word_instance = Word.objects.create(word=word)
+                update_meaning_cam.delay(word_instance.id)
+                words_instances.append(word_instance)
 
     def to_representation(self, instance):
         return SetDetailSerializer(instance).data

@@ -138,3 +138,10 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ),
 }
+
+REDIS_HOST = get_env('REDIS_HOST')
+BROKER_URL = 'redis://{}/3'.format(REDIS_HOST)
+
+PARSER_SETTINGS = {
+    'user_agent': get_env("USER_AGENT")
+}
